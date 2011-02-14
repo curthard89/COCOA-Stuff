@@ -64,7 +64,7 @@
 
 - (void)zoomIn:(id)sender
 {
-
+    
     if( [self isAnimating] )
     {
         return;
@@ -158,11 +158,20 @@
 - (void)animationDidStop:(CABasicAnimation *)anim
                 finished:(BOOL)flag
 {
+    [NSTimer scheduledTimerWithTimeInterval:.1
+                                     target:self 
+                                   selector:@selector(clearScreen)
+                                   userInfo:nil
+                                    repeats:NO];
+}
+
+- (void)clearScreen
+{
     NSDisableScreenUpdates();
     [overScreenWindow close];
     [self makeKeyAndOrderFront:nil];
     [self setIsAnimating:NO];
-    NSEnableScreenUpdates();
+    NSEnableScreenUpdates();   
 }
 
 @end

@@ -40,5 +40,6 @@
 @property ( nonatomic, assign ) float animationStartScale;
 
 - (void)zoomIn:(id)sender;
+- (void)clearScreen;
 
 @end
