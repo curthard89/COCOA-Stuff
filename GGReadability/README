@@ -1,0 +1,40 @@
+GGReadability was originally based on the open source JS readability code.
+
+Ported to object-c for much improved speed and compatibility.
+
+ Since then I have changed how this works so it does the follow :
+    - Convert all line breaks and br tags to p tags so we can search better
+    - If parsed a hint, score up the element based on wether it matches the hint parsed in
+    - Scores up elements based on image size within them
+    - Scores up elements based on size of embeds inside them
+    - Scores up elements on puncation, number of words, how many paragraphs they have and if they contain lists or headers
+    - Scores up elements on same principle readabilty did with checking class and id's against certain key words
+    - Scores up elements on wether they use the HTML5 article or section tag names
+    - Marks down on forms, inputs and any other stuff thats not normally inside articles
+    - Marks down on same principle readabily uses with checking class and id's against certain key words
+ Once the element has been found, its then cleaned from any unwanted elements, such as unwanted divs etc then replaces p tags
+ we have injected back with br tags, then removes duplicate br tags if they are next to each other.
+ 
+ Simple to use, heres an example :
+ 
+ for use with the standard delete way of doing things
+ 
+ GGReadability * read = [[GGReadability alloc] initWithURL:aURL delegate:anObject];
+ 
+ or for the more adventourous you can use blocks
+ 
+ GGReadability * read = [[GGReadability alloc] initWithURL:aURL completionHandler:^(NSString * string){ // do something with string } errorHandler:^(NSError * error){ // something wrong happened! }];
+ 
+ once you have set up the object, to help parsing and better results, if you know parts of the article your trying to grab you can parse a hint in which it will use to grab better results
+ 
+ [read setHint:@"hello world!"];
+ 
+ now call render to do the parsing
+ 
+ [read render];
+ 
+ at the end it will return the found article to either the block method or the delegate method.
+ 
+ For progress, you can bind or listen to [read loadProgress] which is a float between 0.0 and 1.0
+ 
+ Have fun!
