@@ -510,7 +510,7 @@ didReceiveResponse:(NSURLResponse *)response
         
         // increase by embed objects with reasonable viewing size
         
-        curScore += [self countForChildWithXPath:@"//embed[@width>=200] or height>=150"
+        curScore += [self countForChildWithXPath:@"//embed[@width>=200 or height>=150]"
                                       forElement:parent
                                       multiplier:10];
         
