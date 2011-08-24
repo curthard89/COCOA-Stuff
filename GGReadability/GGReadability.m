@@ -113,6 +113,7 @@
 - (void)dealloc
 {
     [hint release], hint = nil;
+    [hintWords release], hintWords = nil;
     [URL release], URL = nil;
     [contents release], contents = nil;
     [responseData release], responseData = nil;
