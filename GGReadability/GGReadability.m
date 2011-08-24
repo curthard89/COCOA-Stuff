@@ -120,8 +120,8 @@
     [connection release], connection = nil;
     if( [self useBlocks] )
     {
-        [completionBlock release];
-        [errorBlock release];
+        [completionBlock release], completionBlock = nil;
+        [errorBlock release], errorBlock = nil;
     }
     [super dealloc];
 }
