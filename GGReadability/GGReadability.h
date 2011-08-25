@@ -56,6 +56,7 @@
 // use these for init'ing with blocks
 typedef void (^GGReadabilityCompletionHandler)(NSString * parsedString);
 typedef void (^GGReadabilityErrorHandler)(NSError * error);
+typedef NSString * (^GGReadabilityURLHandler)(NSString * parsedString);
 
 @interface GGReadability : NSObject <NSURLConnectionDelegate> {
     
@@ -72,6 +73,7 @@ typedef void (^GGReadabilityErrorHandler)(NSError * error);
     NSMutableData * responseData;
     long long length;    
     NSURLConnection * connection;
+    NSURLResponse * response;
     BOOL useBlocks;
     
     GGReadabilityCompletionHandler completionBlock;
@@ -86,6 +88,11 @@ typedef void (^GGReadabilityErrorHandler)(NSError * error);
 @property ( nonatomic, assign ) BOOL isRendering;
 @property ( nonatomic, assign ) BOOL useBlocks;
 @property ( nonatomic, copy ) NSString * contents;
+
++ (void)addURLHandler:(GGReadabilityURLHandler)handler
+               forURL:(NSURL *)aURL;
+
++ (void)removeHandlerForURL:(NSURL *)aURL;
 
 - (id)initWithURL:(NSURL *)aURL
          delegate:(id<GGReadabilityDelegate>)anObject;

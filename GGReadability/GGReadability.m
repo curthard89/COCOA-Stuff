@@ -24,6 +24,9 @@
 // private
 @interface GGReadability (private)
 
+// returns the handler for a given url, if specified
+- (GGReadabilityURLHandler)URLHandlerForURL:(NSURL *)aURL;
+
 // handles the error given by nsurlconnection
 - (void)handleURLError;
 
@@ -110,6 +113,8 @@
 @synthesize URL, delegate, hint, useBlocks;
 @synthesize isRendering, contents, loadProgress;
 
+static NSMutableDictionary * handlers = nil;
+
 - (void)dealloc
 {
     [hint release], hint = nil;
@@ -118,12 +123,36 @@
     [contents release], contents = nil;
     [responseData release], responseData = nil;
     [connection release], connection = nil;
+    [response release], response = nil;
     if( [self useBlocks] )
     {
-        [completionBlock release], completionBlock = nil;
-        [errorBlock release], errorBlock = nil;
+        [completionBlock release];
+        [errorBlock release];
     }
     [super dealloc];
+}
+
++ (void)addURLHandler:(GGReadabilityURLHandler)handler
+               forURL:(NSURL *)aURL
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        handlers = [[NSMutableDictionary alloc] init];
+    });
+    [handlers setObject:[[handler copy] autorelease]
+                 forKey:[aURL host]];
+}
+
++ (void)removeHandlerForURL:(NSURL *)aURL
+{
+    if( [[handlers allKeys] count] == 0 )
+    {
+        return;
+    }
+    if( [[handlers allKeys] containsObject:[aURL host]] )
+    {
+        [handlers removeObjectForKey:[aURL host]];
+    }
 }
 
 - (id)initWithURL:(NSURL *)aURL
@@ -236,12 +265,33 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
     [self setLoadProgress:prog];
 }
 
+- (GGReadabilityURLHandler)URLHandlerForURL:(NSURL *)aURL
+{
+    NSString * base = [aURL host];
+    if( [[handlers allKeys] containsObject:base] )
+    {
+        return [handlers objectForKey:base];
+    }
+    return nil;
+}
+
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     dispatch_queue_t queue = dispatch_queue_create( "com.geekygoodness.ggreadability", NULL );
-    NSString * str = [[NSString alloc] initWithData:responseData
-                                           encoding:NSUTF8StringEncoding];
     dispatch_async( queue, ^(void){
+        
+        NSString * str = [[NSString alloc] initWithData:responseData
+                                               encoding:NSUTF8StringEncoding];
+        
+        // is there a handler?
+        
+        GGReadabilityURLHandler handler = nil;
+        if( ( handler = [self URLHandlerForURL:[response URL]] ) != nil )
+        {
+            // call the handler and set the contents
+            
+           str = [handler( [str autorelease] ) copy];
+        }
         
         // due to the html might not be valid, we try just standard XML to begin with
         
@@ -294,9 +344,10 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
 }
 
 - (void)connection:(NSURLConnection *)connection
-didReceiveResponse:(NSURLResponse *)response
+didReceiveResponse:(NSURLResponse *)aResponse
 {
-    length = [response expectedContentLength];
+    response = [aResponse retain];
+    length = [aResponse expectedContentLength];
 }
 
 - (void)handleURLError
