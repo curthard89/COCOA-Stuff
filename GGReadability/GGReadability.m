@@ -157,7 +157,7 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
 {
     if( [self hint] )
     {
-        [[self hint] release], hint = nil;
+        [hint release], hint = nil;
     }
     hint = [str copy];
     NSTextStorage * store = [[[NSTextStorage alloc] initWithString:[self hint]] autorelease];
