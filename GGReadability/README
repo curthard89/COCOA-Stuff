@@ -1,5 +1,7 @@
 GGReadability was originally based on the open source JS readability code.
 
+Please note, this only currently runs on Mac OSX, not iOS, if you plan to port to iOS give me a shout.
+
 Ported to object-c for much improved speed and compatibility.
 
  Since then I have changed how this works so it does the follow :
