@@ -56,7 +56,7 @@
 // use these for init'ing with blocks
 typedef void (^GGReadabilityCompletionHandler)(NSString * parsedString);
 typedef void (^GGReadabilityErrorHandler)(NSError * error);
-typedef NSString * (^GGReadabilityURLHandler)(NSString * parsedString);
+typedef NSString * (^GGReadabilityURLHandler)(NSString * parsedString, NSError ** error);
 
 @interface GGReadability : NSObject <NSURLConnectionDelegate> {
     

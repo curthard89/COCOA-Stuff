@@ -51,6 +51,10 @@
                type:(NSXMLDocumentContentKind)type
        useWordCount:(BOOL)flag;
 
+// fixes relative urls to absolute
+- (void)fixRelativeURLForElement:(NSXMLElement *)element
+                       attribute:(NSString *)attribute;
+
 // cleans up the given element
 - (void)cleanElement:(NSXMLElement *)element;
 
@@ -105,6 +109,10 @@
 #define DOC_FORMAT_XML NSXMLDocumentXMLKind|NSXMLDocumentTidyXML
 #define DOC_FORMAT_HTML NSXMLDocumentHTMLKind|NSXMLDocumentTidyHTML
 #define DOC_FORMAT_XHTML NSXMLDocumentXHTMLKind|NSXMLDocumentTidyHTML
+#define DOC_FORMAT_NONE 0
+
+// url delimnator
+#define URL_DELIMINATOR @"/"
 
 // error domain
 #define ERROR_DOMAIN [NSString stringWithFormat:@"com.geekygoodness.",[self class]]
@@ -279,9 +287,16 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
 {
     dispatch_queue_t queue = dispatch_queue_create( "com.geekygoodness.ggreadability", NULL );
     dispatch_async( queue, ^(void){
-        
+            
         NSString * str = [[NSString alloc] initWithData:responseData
                                                encoding:NSUTF8StringEncoding];
+        
+        if( str == NULL || str == nil )
+        {
+            // try mac roman
+            str = [[NSString alloc] initWithData:responseData
+                                        encoding:NSMacOSRomanStringEncoding];
+        }
         
         // is there a handler?
         
@@ -289,8 +304,19 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
         if( ( handler = [self URLHandlerForURL:[response URL]] ) != nil )
         {
             // call the handler and set the contents
+
+            NSError * error = nil;
+            NSString * tempStr = [handler( str, &error ) copy];
             
-           str = [handler( [str autorelease] ) copy];
+            // if error, just use standard parsed string
+            
+            if( error != nil )
+            {
+                [tempStr release];
+            } else {
+                [str release], str = nil;
+                str = tempStr;
+            }
         }
         
         // due to the html might not be valid, we try just standard XML to begin with
@@ -323,7 +349,7 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
     [self parseString:str
                  type:DOC_FORMAT_XML
          useWordCount:flag];
-    if( [self contents] == NULL )
+    if( [self contents] == NULL || [[self contents] length] == 0 )
     {
         
         // then if the xml is null we try standard html
@@ -331,7 +357,7 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
         [self parseString:str
                      type:DOC_FORMAT_HTML
              useWordCount:flag];
-        if( [self contents] == NULL )
+        if( [self contents] == NULL || [[self contents] length] == 0 )
         {
             
             // and if the html is null we try xhtml
@@ -339,6 +365,15 @@ completionHandler:(GGReadabilityCompletionHandler)cHandler
             [self parseString:str
                          type:DOC_FORMAT_XHTML
                  useWordCount:flag];
+            
+            if( [self contents] == NULL || [[self contents] length] == 0 )
+            {
+                // now no options
+                [self parseString:str
+                             type:DOC_FORMAT_NONE
+                     useWordCount:flag];
+            }
+            
         }
     }
 }
@@ -689,6 +724,47 @@ didReceiveResponse:(NSURLResponse *)aResponse
         }
         [element removeChildAtIndex:[div index]];
     }    
+    
+    // sort out image tags url's
+    NSArray * images = [element nodesForXPath:@"//img[not(contains(@src,'http'))]"
+                                        error:&error];
+    for( NSXMLElement * img in images ) 
+    {
+        [self fixRelativeURLForElement:img
+                             attribute:@"src"];
+    }
+    
+    // sort out link urls
+    NSArray * links = [element nodesForXPath:@"//a[not(contains(@href,'http'))]"
+                                       error:&error];
+    for( NSXMLElement * link in links )
+    {
+        [self fixRelativeURLForElement:link
+                             attribute:@"href"];
+    }
+    
+}
+
+- (void)fixRelativeURLForElement:(NSXMLElement *)element
+                       attribute:(NSString *)attribute
+{
+    NSString * src = [[element attributeForName:attribute] stringValue];
+    NSString * newSRC = nil;
+    if( [src length] == 0 )
+    {
+        return;
+    }
+    if( [[src substringToIndex:1] isEqualToString:URL_DELIMINATOR] )
+    {
+        // prepend with host
+        newSRC = [NSString stringWithFormat:@"%@:%@%@%@%@",[[response URL] scheme],URL_DELIMINATOR,URL_DELIMINATOR,[[response URL] host],src];
+    } else {
+        // prepend with the page your on
+        NSString * appendURL = [[response URL] absoluteString];
+        BOOL appendSlash = [[appendURL substringWithRange:NSMakeRange( [appendURL length] - 1, 1)] isEqualToString:URL_DELIMINATOR];
+        newSRC = [NSString stringWithFormat:@"%@%@%@",[[response URL] absoluteString],( appendSlash ? URL_DELIMINATOR : @"" ),src];
+    }
+    [[element attributeForName:attribute] setStringValue:newSRC];
 }
 
 - (void)replaceElementsForXPath:(NSString *)path
