@@ -32,7 +32,7 @@ Ported to object-c for much improved speed and compatibility.
  if you know the site is going to cause pain when parsing, for instance, gizmodo uses JavaScript to inject content in then you can add custom handlers per domain and return a string back to readability
  which will then parse what you return, for example :
  
- [GGReadability addURLHandler:^NSString * ( NSString * parsedString )
+ [GGReadability addURLHandler:^NSString * ( NSString * parsedString, NSError ** error )
  {
  	// do something with the string
  	return parsedString;
