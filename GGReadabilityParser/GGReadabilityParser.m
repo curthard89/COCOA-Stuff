@@ -4,6 +4,11 @@
 
 #import "GGReadabilityParser.h"
 
+
+// Original XPath: @".//%@". Alternative XPath: @".//*[matches(name(),'%@','i')]"
+NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
+
+
 @interface GGReadabilityParser ( private )
 
 - (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element;
@@ -154,7 +159,6 @@ didReceiveResponse:(NSURLResponse *)response
     };
     
     NSXMLDocument * XML = nil;
-    NSXMLElement * theEl = nil;
     
     // different types, html, xml
     BOOL OKToGo = NO;
@@ -241,7 +245,7 @@ didReceiveResponse:(NSURLResponse *)response
     // remove any tags specified
     for( NSString * tagToRemove in elementsToRemove )
     {
-        NSArray * removeElements = [element nodesForXPath:[NSString stringWithFormat:@"//%@",tagToRemove]
+        NSArray * removeElements = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath, tagToRemove]
                                                     error:&error];
         for( NSXMLElement * removeEl in removeElements )
         {
@@ -252,7 +256,7 @@ didReceiveResponse:(NSURLResponse *)response
     // remove any styles
     if( options & GGReadabilityParserOptionClearStyles )
     {
-        NSArray * cleanArray = [element nodesForXPath:@"//*[@style]"
+        NSArray * cleanArray = [element nodesForXPath:@".//*[@style]"
                                                 error:&error];
         for( NSXMLElement * cleanElement in cleanArray )
         {
@@ -264,7 +268,7 @@ didReceiveResponse:(NSURLResponse *)response
     if( options & GGReadabilityParserOptionClearLinkLists )
     {
         NSArray * lookFor = [NSArray arrayWithObjects:@"similar", @"bookmark", @"links", @"social", @"nav", @"comments", @"comment", @"date", @"author", @"time", @"cat", @"related", nil];
-        NSArray * allElements = [element nodesForXPath:@"//*"
+        NSArray * allElements = [element nodesForXPath:@".//*"
                                                  error:&error];
         for( NSXMLElement * theElement in allElements )
         {
@@ -343,7 +347,7 @@ didReceiveResponse:(NSURLResponse *)response
     for( NSDictionary * dict in elementsToRemove )
     {
         // grab the elements
-        NSArray * els = [element nodesForXPath:[NSString stringWithFormat:@"//%@",[dict objectForKey:@"tagName"]]
+        NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
                                          error:&error];
         for( NSXMLElement * fixEl in els )
         {
@@ -389,7 +393,7 @@ didReceiveResponse:(NSURLResponse *)response
     for( NSString * removeTag in toRemove )
     {
         // find them all
-        NSArray * removeArray = [element nodesForXPath:[NSString stringWithFormat:@"//%@",removeTag]
+        NSArray * removeArray = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath, removeTag]
                                                  error:&error];
         for( NSXMLElement * removeElement in removeArray )
         {
@@ -405,13 +409,13 @@ didReceiveResponse:(NSURLResponse *)response
     
     for( NSString * instantWinName in instantWins )
     {
-        NSArray * nodes = [element nodesForXPath:[NSString stringWithFormat:@"//*[contains(@class,'%@') or contains(@id,'%@')]", instantWinName, instantWinName]
+        NSArray * nodes = [element nodesForXPath:[NSString stringWithFormat:@".//*[contains(@class,'%@') or contains(@id,'%@')]", instantWinName, instantWinName]
                                            error:&error];
         if( [nodes count] != 0 )
         {
             for( NSXMLElement * winElement in nodes )
             {
-                NSInteger count = [[winElement nodesForXPath:@"//p"
+                NSInteger count = [[winElement nodesForXPath:@".//p"
                                                        error:&error] count];
                 if( count > pCount )
                 {
@@ -428,7 +432,7 @@ didReceiveResponse:(NSURLResponse *)response
         return foundElement;
     }
     
-    NSArray * tags = [element nodesForXPath:@"//p"
+    NSArray * tags = [element nodesForXPath:@".//p"
                                       error:&error];
     
     NSInteger currentCount = 0;
@@ -454,7 +458,7 @@ didReceiveResponse:(NSURLResponse *)response
         // try old school br tags
         currentCount = 0;
         usingBR = YES;
-        tags = [element nodesForXPath:@"//br"
+        tags = [element nodesForXPath:@".//br"
                                 error:&error];
         for( NSXMLElement * tag in tags )
         {
@@ -493,7 +497,7 @@ didReceiveResponse:(NSURLResponse *)response
             tagParent = nil;
         } else {
             // remove any br tags directly next to each other
-            NSArray * brs = [tagParent nodesForXPath:@"//br[preceding-sibling::br[1]]"
+            NSArray * brs = [tagParent nodesForXPath:@".//br[preceding-sibling::br[1]]"
                                                error:&error];
             for( NSXMLElement * br in brs )
             {
@@ -508,7 +512,7 @@ didReceiveResponse:(NSURLResponse *)response
         
         // now we’re going to try and find the content, because either they don’t use <p> tags or it’s just horrible markup
     
-        NSArray * elements = [element nodesForXPath:@"//*"
+        NSArray * elements = [element nodesForXPath:@".//*"
                                               error:&error];
         
         NSMutableDictionary * scoreDict = [NSMutableDictionary dictionary];
