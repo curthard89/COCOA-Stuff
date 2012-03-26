@@ -540,24 +540,24 @@ didReceiveResponse:(NSURLResponse *)response
     // these are key words that will probably be inside the class or id of the element that houses the content
     NSArray * scores = [NSArray arrayWithObjects:@"post", @"entry", @"content", @"text", @"article", @"story", @"blog", nil];
     NSInteger score = 0;
-    for( NSString * possitiveWord in scores )
+    for( NSString * positiveWord in scores )
     {
-        score += [[[element name] lowercaseString] isEqualToString:possitiveWord] ? 150 : 0;
+        score += [[[element name] lowercaseString] isEqualToString:positiveWord] ? 150 : 0;
         
         // grab the class names and id names
         NSArray * classNames = [[[element attributeForName:@"class"] stringValue] componentsSeparatedByString:@" "];
         NSArray * idNames = [[[element attributeForName:@"id"] stringValue] componentsSeparatedByString:@" "];
         
-        // match against the possitive class
+        // match against the positive class
         for( NSString * className in classNames )
         {
-            score += [className rangeOfString:possitiveWord].length != 0 ? 20 : 0;
+            score += [className rangeOfString:positiveWord].length != 0 ? 20 : 0;
         }
         
-        // match against the possitive id
+        // match against the positive id
         for( NSString * idName in idNames )
         {
-            score += [idName rangeOfString:possitiveWord].length != 0 ? 30 : 0;
+            score += [idName rangeOfString:positiveWord].length != 0 ? 30 : 0;
         }
     }
     return score;
