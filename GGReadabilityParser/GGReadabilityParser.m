@@ -247,6 +247,13 @@ didReceiveResponse:(NSURLResponse *)response
     {
         NSArray * removeElements = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath, tagToRemove]
                                                     error:&error];
+        
+        if( removeElements == nil )
+        {
+            [self errorOut];
+            return;
+        }
+        
         for( NSXMLElement * removeEl in removeElements )
         {
             [removeEl detach];
@@ -349,6 +356,13 @@ didReceiveResponse:(NSURLResponse *)response
         // grab the elements
         NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
                                          error:&error];
+        
+        if( els == nil )
+        {
+            [self errorOut];
+            return;
+        }
+        
         for( NSXMLElement * fixEl in els )
         {
             NSXMLNode * attribute = [fixEl attributeForName:[dict objectForKey:@"attributeName"]];
