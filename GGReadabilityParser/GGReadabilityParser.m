@@ -363,8 +363,8 @@ didReceiveResponse:(NSURLResponse *)response
         [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
     }
     
-    // ignore the name, just easy to reuse
-    NSString * baseURL = [NSString stringWithFormat:@"%@://%@",[[URLResponse URL] scheme],[[URLResponse URL] host]];
+    NSURL * baseURL = [URLResponse URL];
+    
     for( NSDictionary * dict in elementsToRemove )
     {
         // grab the elements
@@ -384,7 +384,8 @@ didReceiveResponse:(NSURLResponse *)response
                [[[attribute stringValue] substringToIndex:1] isEqualToString:@"/"] )
             {
                 // needs fixing
-                NSString * newAttributeString = [NSString stringWithFormat:@"%@%@",baseURL,[attribute stringValue]];
+                NSString * newAttributeString = [[NSURL URLWithString:attributeStringValue
+                                                        relativeToURL:baseURL] absoluteString];
                 [attribute setStringValue:newAttributeString];
             }
         }
