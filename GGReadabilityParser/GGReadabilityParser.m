@@ -245,7 +245,7 @@ didReceiveResponse:(NSURLResponse *)response
                                                     error:&error];
         for( NSXMLElement * removeEl in removeElements )
         {
-            [(NSXMLElement *)[removeEl parent] removeChildAtIndex:[removeEl index]];
+            [removeEl detach];
         }
     }
     
@@ -293,7 +293,7 @@ didReceiveResponse:(NSURLResponse *)response
             
             if( killElement )
             {
-                [(NSXMLElement *)[theElement parent] removeChildAtIndex:[theElement index]];
+                [theElement detach];
                 continue;
             }
             
@@ -317,7 +317,7 @@ didReceiveResponse:(NSURLResponse *)response
             // if kill element, remove it!
             if( killElement )
             {
-                [(NSXMLElement *)[theElement parent] removeChildAtIndex:[theElement index]];
+                [theElement detach];
             }
             
         }
@@ -393,7 +393,7 @@ didReceiveResponse:(NSURLResponse *)response
                                                  error:&error];
         for( NSXMLElement * removeElement in removeArray )
         {
-            [(NSXMLElement *)[removeElement parent] removeChildAtIndex:[removeElement index]];
+            [removeElement detach];
         }
     }
     
@@ -497,7 +497,7 @@ didReceiveResponse:(NSURLResponse *)response
                                                error:&error];
             for( NSXMLElement * br in brs )
             {
-                [(NSXMLElement *)[br parent] removeChildAtIndex:[br index]];
+                [br detach];
             }
         }
         
