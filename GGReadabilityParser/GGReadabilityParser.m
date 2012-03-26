@@ -196,7 +196,7 @@ didReceiveResponse:(NSURLResponse *)response
 
     // now that we have the base element to work with, let’s remove all <div>s that don’t have a parent of a p
     
-    NSMutableArray * elementsToRemove = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray * elementsToRemove = [NSMutableArray array];
     
     // remove divs
     if( options & GGReadabilityParserOptionRemoveDivs )
@@ -511,8 +511,8 @@ didReceiveResponse:(NSURLResponse *)response
         NSArray * elements = [element nodesForXPath:@"//*"
                                               error:&error];
         
-        NSMutableDictionary * scoreDict = [[[NSMutableDictionary alloc] init] autorelease];
-    
+        NSMutableDictionary * scoreDict = [NSMutableDictionary dictionary];
+        
         NSXMLElement * currentElement = nil;
     
         // grab everything that has it within class or id
