@@ -122,7 +122,7 @@ didReceiveResponse:(NSURLResponse *)response
             }
         }
         
-        // if cant convert data to a string, just die
+        // if we can’t convert the data to a string, just die
         if( str == nil )
         {
             [self errorOut];
@@ -146,7 +146,7 @@ didReceiveResponse:(NSURLResponse *)response
         return;
     }
     
-    NSError * error = nil; // we dont actually pay attention to this
+    NSError * error = nil; // we don’t actually pay attention to this
     
     NSInteger types[2] = {
         NSXMLDocumentTidyHTML,
@@ -194,7 +194,7 @@ didReceiveResponse:(NSURLResponse *)response
         return;
     }
 
-    // now we have the base element to work with, lets remove all div's that dont have a parent of a p
+    // now that we have the base element to work with, let’s remove all <div>s that don’t have a parent of a p
     
     NSMutableArray * elementsToRemove = [[[NSMutableArray alloc] init] autorelease];
     
@@ -326,13 +326,13 @@ didReceiveResponse:(NSURLResponse *)response
     // do we need to fix the links or the images
     [elementsToRemove removeAllObjects];
     
-    // img tags
+    // <img> tags
     if( options & GGReadabilityParserOptionFixImages )
     {
         [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"img", @"tagName", @"src", @"attributeName",nil]];
     }
     
-    // a tags
+    // <a> tags
     if( options & GGReadabilityParserOptionFixLinks )
     {
         [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
@@ -358,7 +358,7 @@ didReceiveResponse:(NSURLResponse *)response
         }
     }
     
-    // were done!
+    // we’re done!
     
     NSData * data = [[element XMLString] dataUsingEncoding:NSUTF8StringEncoding
                                       allowLossyConversion:YES];
@@ -381,8 +381,8 @@ didReceiveResponse:(NSURLResponse *)response
 
 - (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element
 {
-    NSError * error = nil; // again, we dont actually care
-    // generally speaking, the content lies within ptags - we hope
+    NSError * error = nil; // again, we don’t actually care
+    // generally speaking, we hope that the content is within the <p> tags
     
     // clean up the element
     NSArray * toRemove = [NSArray arrayWithObjects:@"noscript", @"script", @"form", nil];
@@ -435,7 +435,7 @@ didReceiveResponse:(NSURLResponse *)response
     NSXMLElement * tagParent = nil;
     for( NSXMLElement * tag in tags )
     {
-        NSXMLElement * parent = (NSXMLElement *)[tag parent];
+        NSXMLElement * parent = (NSXMLElement *)[tag parent]; // the parent always is an element
         
         // count how many p tags are inside the parent
         NSInteger parentTagsCount = [[parent nodesForXPath:@"p"
@@ -502,11 +502,11 @@ didReceiveResponse:(NSURLResponse *)response
         }
         
     }
-    // if nothing is found, lets try something else...
+    // if nothing is found, let’s try something else…
     if( tagParent == nil )
     {
         
-        // now were going to find and find the content, because either they dont use ptags or its just horrible markup
+        // now we’re going to try and find the content, because either they don’t use <p> tags or it’s just horrible markup
     
         NSArray * elements = [element nodesForXPath:@"//*"
                                               error:&error];
@@ -522,7 +522,7 @@ didReceiveResponse:(NSURLResponse *)response
             NSInteger score = [scoreDict objectForKey:el] ? [[scoreDict objectForKey:el] integerValue] : 0;
             score += [self scoreElement:el];
             
-            // store it within a dict
+            // store it in the dict
             [scoreDict setObject:[NSNumber numberWithInteger:score]
                           forKey:el];                
         }        
@@ -537,7 +537,7 @@ didReceiveResponse:(NSURLResponse *)response
 
 - (NSInteger)scoreElement:(NSXMLElement *)element
 {
-    // these are key words that will probably be inside the class or id of the element that houses the content
+    // these are key words that will probably be inside the class or id of the element that contains the content
     NSArray * scores = [NSArray arrayWithObjects:@"post", @"entry", @"content", @"text", @"article", @"story", @"blog", nil];
     NSInteger score = 0;
     for( NSString * positiveWord in scores )
