@@ -263,7 +263,7 @@ didReceiveResponse:(NSURLResponse *)response
     // clear link lists
     if( options & GGReadabilityParserOptionClearLinkLists )
     {
-        NSArray * lookFor = [NSArray arrayWithObjects:@"similar",@"bookmark",@"links",@"social",@"nav",@"comments",@"comment",@"date",@"author",@"time",@"cat",@"related", nil];
+        NSArray * lookFor = [NSArray arrayWithObjects:@"similar", @"bookmark", @"links", @"social", @"nav", @"comments", @"comment", @"date", @"author", @"time", @"cat", @"related", nil];
         NSArray * allElements = [element nodesForXPath:@"//*"
                                                  error:&error];
         for( NSXMLElement * theElement in allElements )
@@ -329,13 +329,13 @@ didReceiveResponse:(NSURLResponse *)response
     // img tags
     if( options & GGReadabilityParserOptionFixImages )
     {
-        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"img",@"tagName",@"src",@"attributeName",nil]];
+        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"img", @"tagName", @"src", @"attributeName",nil]];
     }
     
     // a tags
     if( options & GGReadabilityParserOptionFixLinks )
     {
-        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a",@"tagName",@"href",@"attributeName",nil]];
+        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
     }
     
     // ignore the name, just easy to reuse
@@ -385,7 +385,7 @@ didReceiveResponse:(NSURLResponse *)response
     // generally speaking, the content lies within ptags - we hope
     
     // clean up the element
-    NSArray * toRemove = [NSArray arrayWithObjects:@"noscript",@"script",@"form", nil];
+    NSArray * toRemove = [NSArray arrayWithObjects:@"noscript", @"script", @"form", nil];
     for( NSString * removeTag in toRemove )
     {
         // find them all
@@ -538,7 +538,7 @@ didReceiveResponse:(NSURLResponse *)response
 - (NSInteger)scoreElement:(NSXMLElement *)element
 {
     // these are key words that will probably be inside the class or id of the element that houses the content
-    NSArray * scores = [NSArray arrayWithObjects:@"post",@"entry",@"content",@"text",@"article",@"story",@"blog", nil];
+    NSArray * scores = [NSArray arrayWithObjects:@"post", @"entry", @"content", @"text", @"article", @"story", @"blog", nil];
     NSInteger score = 0;
     for( NSString * possitiveWord in scores )
     {
