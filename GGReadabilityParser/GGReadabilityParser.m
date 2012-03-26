@@ -20,6 +20,8 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
 
 @synthesize loadProgress;
 
+// CHANGME: change ivars into private properties where appropriate
+
 - (void)dealloc
 {
     [URL release], URL = nil;
@@ -198,6 +200,7 @@ didReceiveResponse:(NSURLResponse *)response
         return;
     }
 
+    // CHANGME: The next comment doesn’t match what’s going on in the code!
     // now that we have the base element to work with, let’s remove all <div>s that don’t have a parent of a p
     
     NSMutableArray * elementsToRemove = [NSMutableArray array];
@@ -287,6 +290,7 @@ didReceiveResponse:(NSURLResponse *)response
             if (theElement == nil)  continue;
             
             // grab the ids
+            // CHANGEME: We could use -cssNamesForAttributeWithName: here
             NSArray * idNames = [[[theElement attributeForName:@"id"] stringValue] componentsSeparatedByString:@" "];
             
             BOOL killElement = NO;
@@ -384,6 +388,8 @@ didReceiveResponse:(NSURLResponse *)response
             NSXMLNode * attribute = [fixEl attributeForName:attributeName];
             NSString * attributeStringValue = [attribute stringValue];
             
+            // CHANGEME: This ignores relative paths
+            // CHANGEME: This is not necessary when processing webarchives 
             if( [attributeStringValue length] != 0 && 
                [attributeStringValue hasPrefix:@"/"] )
             {
@@ -416,6 +422,9 @@ didReceiveResponse:(NSURLResponse *)response
     });   
 }
 
+// CHANGEME: rewrite to pass error by reference
+// CHANGEME: check use of NSInteger vs. NSUInteger
+// CHANGEME: rename variables named elem…
 - (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element
 {
     NSError * error = nil; // again, we don’t actually care
@@ -569,6 +578,9 @@ didReceiveResponse:(NSURLResponse *)response
                           forKey:el];                
         } while ((elem = [elem nextNode]) != nil);
         
+        // CHANGEME: This code doesn’t actually do ANYTHING with the scoreDict
+        // CHANGEME: The above use of an NSMutableDictionary will fail horribly if there happen to be two NSXMLElement objects in the tree that are equal as defined by -isEqual: . The problem here is that the equality check will ignore the location of the element within the tree. If we try to actually use the scores to find a suitable element the resulting element we get is not deterministic from a global perspective. We can apply the solution used in readability-objc (HashableElement): https://github.com/JanX2/readability-objc [Jan]
+        
         // set the parent tag
         tagParent = currentElement;
         
@@ -580,6 +592,7 @@ didReceiveResponse:(NSURLResponse *)response
 - (NSInteger)scoreElement:(NSXMLElement *)element
 {
     // these are key words that will probably be inside the class or id of the element that contains the content
+    // CHANGME: move the scores array into an ivar
     NSArray * scores = [NSArray arrayWithObjects:@"post", @"entry", @"content", @"text", @"article", @"story", @"blog", nil];
     NSInteger score = 0;
     for( NSString * positiveWord in scores )
@@ -587,6 +600,7 @@ didReceiveResponse:(NSURLResponse *)response
         score += [[[element name] lowercaseString] isEqualToString:positiveWord] ? 150 : 0;
         
         // grab the class names and id names
+        // CHANGEME: We could use -cssNamesForAttributeWithName: here
         NSArray * classNames = [[[element attributeForName:@"class"] stringValue] componentsSeparatedByString:@" "];
         NSArray * idNames = [[[element attributeForName:@"id"] stringValue] componentsSeparatedByString:@" "];
         
