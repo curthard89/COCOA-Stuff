@@ -238,7 +238,7 @@ didReceiveResponse:(NSURLResponse *)response
     {
         for( NSInteger i = 2; i <= 6; i++ )
         {
-            [elementsToRemove addObject:[NSString stringWithFormat:@"h%ld",i]];
+            [elementsToRemove addObject:[NSString stringWithFormat:@"h%ld", (long)i]];
         }
     }
     
