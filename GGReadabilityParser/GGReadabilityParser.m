@@ -377,11 +377,15 @@ didReceiveResponse:(NSURLResponse *)response
             return;
         }
         
+        NSString * attributeName = [dict objectForKey:@"attributeName"];
+        
         for( NSXMLElement * fixEl in els )
         {
-            NSXMLNode * attribute = [fixEl attributeForName:[dict objectForKey:@"attributeName"]];
-            if( [[attribute stringValue] length] != 0 && 
-               [[[attribute stringValue] substringToIndex:1] isEqualToString:@"/"] )
+            NSXMLNode * attribute = [fixEl attributeForName:attributeName];
+            NSString * attributeStringValue = [attribute stringValue];
+            
+            if( [attributeStringValue length] != 0 && 
+               [attributeStringValue hasPrefix:@"/"] )
             {
                 // needs fixing
                 NSString * newAttributeString = [[NSURL URLWithString:attributeStringValue
