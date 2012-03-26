@@ -510,7 +510,7 @@ didReceiveResponse:(NSURLResponse *)response
     }
     
     // current br count
-    if( usingBR && tagParent )
+    if( usingBR && tagParent != nil )
     {
         NSInteger textChildren = 0;
         NSInteger brs = 0;
