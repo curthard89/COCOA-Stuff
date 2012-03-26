@@ -275,22 +275,26 @@ didReceiveResponse:(NSURLResponse *)response
     if( options & GGReadabilityParserOptionClearLinkLists )
     {
         NSArray * lookFor = [NSArray arrayWithObjects:@"similar", @"bookmark", @"links", @"social", @"nav", @"comments", @"comment", @"date", @"author", @"time", @"cat", @"related", nil];
-        NSArray * allElements = [element nodesForXPath:@".//*"
-                                                 error:&error];
-        for( NSXMLElement * theElement in allElements )
+        
+        NSXMLNode *elem = element;
+        
+        do
         {
+            NSXMLElement * theElement = ([elem kind] == NSXMLElementKind) ? (NSXMLElement *)elem : nil;
+            
+            elem = [elem nextNode]; // We do this here, because we might detach elem below
+            
+            if (theElement == nil)  continue;
+            
             // grab the ids
             NSArray * idNames = [[[theElement attributeForName:@"id"] stringValue] componentsSeparatedByString:@" "];
-            
-            // and class names
-            NSArray * classNames = [[[theElement attributeForName:@"class"] stringValue] componentsSeparatedByString:@" "];
             
             BOOL killElement = NO;
             for( NSString * idName in idNames )
             {
                 for( NSString * matchAgainst in lookFor )
                 {
-                    if( [idName rangeOfString:matchAgainst].length != 0 )
+                    if( [idName rangeOfString:matchAgainst].location != NSNotFound )
                     {
                         killElement = YES;
                         break;
@@ -304,16 +308,22 @@ didReceiveResponse:(NSURLResponse *)response
             
             if( killElement )
             {
+                // we can skip the children of theElement, because we are detaching it anyway
+                NSXMLNode * nextSibling = [theElement nextSibling];
+                if (nextSibling != nil)  elem = nextSibling;
+                
                 [theElement detach];
                 continue;
             }
             
-            // now class names
+            // grab the class names
+            NSArray * classNames = [[[theElement attributeForName:@"class"] stringValue] componentsSeparatedByString:@" "];
+            
             for( NSString * className in classNames )
             {
                 for( NSString * matchAgainst in lookFor )
                 {
-                    if( [className rangeOfString:matchAgainst].length != 0 )
+                    if( [className rangeOfString:matchAgainst].location != NSNotFound )
                     {
                         killElement = YES;
                         break;
@@ -328,10 +338,14 @@ didReceiveResponse:(NSURLResponse *)response
             // if kill element, remove it!
             if( killElement )
             {
+                // we can skip the children of theElement, because we are detaching it anyway
+                NSXMLNode * nextSibling = [theElement nextSibling];
+                if (nextSibling != nil)  elem = nextSibling;
+                
                 [theElement detach];
             }
             
-        }
+        } while (elem != nil);
     }
     
     // do we need to fix the links or the images
@@ -525,26 +539,31 @@ didReceiveResponse:(NSURLResponse *)response
     {
         
         // now we’re going to try and find the content, because either they don’t use <p> tags or it’s just horrible markup
-    
-        NSArray * elements = [element nodesForXPath:@".//*"
-                                              error:&error];
         
         NSMutableDictionary * scoreDict = [NSMutableDictionary dictionary];
         
         NSXMLElement * currentElement = nil;
-    
+        
         // grab everything that has it within class or id
-        for( NSXMLElement * el in elements )
+        NSXMLNode * elem = element;
+        
+        do
         {  
+            NSXMLElement * el;
+            if( [elem kind] == NSXMLElementKind )  el = (NSXMLElement *)elem;
+            else  continue;
+            
             // grab its hash
-            NSInteger score = [scoreDict objectForKey:el] ? [[scoreDict objectForKey:el] integerValue] : 0;
+            NSNumber *scoreNum = [scoreDict objectForKey:el];
+            
+            NSInteger score = scoreNum ? [scoreNum integerValue] : 0;
             score += [self scoreElement:el];
             
             // store it in the dict
             [scoreDict setObject:[NSNumber numberWithInteger:score]
                           forKey:el];                
-        }        
-       
+        } while ((elem = [elem nextNode]) != nil);
+        
         // set the parent tag
         tagParent = currentElement;
         
