@@ -12,7 +12,7 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
 @interface GGReadabilityParser ( private )
 
 - (BOOL)checkXMLDocument:(NSXMLDocument *)XML bodyElement:(NSXMLElement **)theEl error:(NSError **)error;
-- (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element;
+- (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element error:(NSError **)error;
 - (NSInteger)scoreElement:(NSXMLElement *)element;
 
 @end
@@ -248,7 +248,7 @@ didReceiveResponse:(NSURLResponse *)response
     if( ! OKToGo )  return nil;
     
     // let the fun begin
-    NSXMLElement * element = [self findBaseLevelContent:theEl];
+    NSXMLElement * element = [self findBaseLevelContent:theEl error:error];
     
     if( ! element )
     {
@@ -455,11 +455,9 @@ didReceiveResponse:(NSURLResponse *)response
 	return element;
 }
 
-// CHANGEME: rewrite to pass error by reference
 // CHANGEME: rename variables named elem…
-- (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element
+- (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element error:(NSError **)error;
 {
-    NSError * error = nil; // again, we don’t actually care
     // generally speaking, we hope that the content is within the <p> tags
     
     // clean up the element
@@ -468,7 +466,7 @@ didReceiveResponse:(NSURLResponse *)response
     {
         // find them all
         NSArray * removeArray = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath, removeTag]
-                                                 error:&error];
+                                                 error:error];
         for( NSXMLElement * removeElement in removeArray )
         {
             [removeElement detach];
@@ -484,13 +482,13 @@ didReceiveResponse:(NSURLResponse *)response
     for( NSString * instantWinName in instantWins )
     {
         NSArray * nodes = [element nodesForXPath:[NSString stringWithFormat:@".//*[contains(@class,'%@') or contains(@id,'%@')]", instantWinName, instantWinName]
-                                           error:&error];
+                                           error:error];
         if( [nodes count] != 0 )
         {
             for( NSXMLElement * winElement in nodes )
             {
                 NSUInteger count = [[winElement nodesForXPath:@".//p"
-                                                       error:&error] count];
+                                                       error:error] count];
                 if( count > pCount )
                 {
                     pCount = count;
@@ -507,7 +505,7 @@ didReceiveResponse:(NSURLResponse *)response
     }
     
     NSArray * tags = [element nodesForXPath:@".//p"
-                                      error:&error];
+                                      error:error];
     
     NSUInteger currentCount = 0;
     NSXMLElement * tagParent = nil;
@@ -517,7 +515,7 @@ didReceiveResponse:(NSURLResponse *)response
         
         // count how many p tags are inside the parent
         NSUInteger parentTagsCount = [[parent nodesForXPath:@"p"
-                                                     error:&error] count];
+                                                     error:error] count];
         if( parentTagsCount > currentCount )
         {
             currentCount = parentTagsCount;
@@ -533,14 +531,14 @@ didReceiveResponse:(NSURLResponse *)response
         currentCount = 0;
         usingBR = YES;
         tags = [element nodesForXPath:@".//br"
-                                error:&error];
+                                error:error];
         for( NSXMLElement * tag in tags )
         {
             NSXMLElement * parent = (NSXMLElement *)[tag parent];
             
             // count how many br tags there are
             NSUInteger parentTagsCount = [[parent nodesForXPath:@"br"
-                                                         error:&error] count];
+                                                         error:error] count];
             parentTagsCount += [self scoreElement:parent];
             if( parentTagsCount > currentCount )
             {
@@ -572,7 +570,7 @@ didReceiveResponse:(NSURLResponse *)response
         } else {
             // remove any br tags directly next to each other
             NSArray * brs = [tagParent nodesForXPath:@".//br[preceding-sibling::br[1]]"
-                                               error:&error];
+                                               error:error];
             for( NSXMLElement * br in brs )
             {
                 [br detach];
