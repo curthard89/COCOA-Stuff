@@ -11,6 +11,7 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
 
 @interface GGReadabilityParser ( private )
 
+- (BOOL)checkXMLDocument:(NSXMLDocument *)XML bodyElement:(NSXMLElement **)theEl error:(NSError **)error;
 - (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element;
 - (NSInteger)scoreElement:(NSXMLElement *)element;
 
@@ -177,17 +178,8 @@ didReceiveResponse:(NSURLResponse *)response
                                                 options:types[i]
                                                   error:&error] autorelease];
         
-        // find the body tag
-        NSXMLElement * el = [[XML nodesForXPath:@"//body"
-                                          error:&error] lastObject];
-        
-        // is there a child count?
-        if( [el childCount] != 0 )
-        {
-            theEl = el;
-            OKToGo = YES;
-            break;
-        }
+		OKToGo = [self checkXMLDocument:XML bodyElement:NULL error:&error];
+		if (OKToGo)  break;
     }
     
     // error out if no xml
@@ -196,6 +188,59 @@ didReceiveResponse:(NSURLResponse *)response
         [self errorOut];
         return;
     }
+	
+	NSXMLElement * element = [self processXMLDocument:XML baseURL:baseURL error:&error];
+
+    
+    // we’re done!
+    
+    NSData * data = [[element XMLString] dataUsingEncoding:NSUTF8StringEncoding
+                                      allowLossyConversion:YES];
+    
+    NSString * returnContents = [[[NSString alloc] initWithData:data
+                                                       encoding:NSUTF8StringEncoding] autorelease];
+    
+    // tell our handler :-)
+    dispatch_async( dispatch_get_main_queue(), ^(void)
+                   {
+                       [self setLoadProgress:1.0];
+                       if( [returnContents length] == 0 )
+                       {
+                           [self errorOut];
+                           return;
+                       }
+                       completionHandler( returnContents );
+                   });   
+}
+
+- (BOOL)checkXMLDocument:(NSXMLDocument *)XML bodyElement:(NSXMLElement **)theEl error:(NSError **)error;
+{
+	*error = nil;
+    
+    // find the body tag
+	NSXMLElement * el = [[XML nodesForXPath:@"//body"
+									  error:error] lastObject];
+	
+	// is there a child count?
+	if( [el childCount] != 0 )
+	{
+		if (theEl != NULL)  *theEl = el;
+		return YES;
+	}
+	
+    if ((error != NULL) && (*error == nil))  *error = [self defaultError];
+	return NO;
+}
+
+- (NSXMLElement *)processXMLDocument:(NSXMLDocument *)XML baseURL:(NSURL *)theBaseURL error:(NSError **)error;
+{
+    NSXMLElement * theEl = nil;
+    BOOL OKToGo = NO;
+	
+	OKToGo = [self checkXMLDocument:XML bodyElement:&theEl error:error];
+	
+	// error out if no xml
+    if( ! OKToGo )  return nil;
     
     // let the fun begin
     NSXMLElement * element = [self findBaseLevelContent:theEl];
@@ -203,8 +248,8 @@ didReceiveResponse:(NSURLResponse *)response
     if( ! element )
     {
         // we tried :-(
-        [self errorOut];
-        return;
+        *error = [self defaultError];
+        return nil;
     }
 
     // CHANGME: The next comment doesn’t match what’s going on in the code!
@@ -256,13 +301,9 @@ didReceiveResponse:(NSURLResponse *)response
     for( NSString * tagToRemove in elementsToRemove )
     {
         NSArray * removeElements = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath, tagToRemove]
-                                                    error:&error];
+                                                    error:error];
         
-        if( removeElements == nil )
-        {
-            [self errorOut];
-            return;
-        }
+        if( removeElements == nil ) return nil;
         
         for( NSXMLElement * removeEl in removeElements )
         {
@@ -274,7 +315,7 @@ didReceiveResponse:(NSURLResponse *)response
     if( options & GGReadabilityParserOptionClearStyles )
     {
         NSArray * cleanArray = [element nodesForXPath:@".//*[@style]"
-                                                error:&error];
+                                                error:error];
         for( NSXMLElement * cleanElement in cleanArray )
         {
             [cleanElement removeAttributeForName:@"style"];
@@ -381,13 +422,9 @@ didReceiveResponse:(NSURLResponse *)response
     {
         // grab the elements
         NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
-                                         error:&error];
+                                         error:error];
         
-        if( els == nil )
-        {
-            [self errorOut];
-            return;
-        }
+        if( els == nil )  return nil;
         
         NSString * attributeName = [dict objectForKey:@"attributeName"];
         
@@ -403,31 +440,13 @@ didReceiveResponse:(NSURLResponse *)response
             {
                 // needs fixing
                 NSString * newAttributeString = [[NSURL URLWithString:attributeStringValue
-                                                        relativeToURL:baseURL] absoluteString];
+                                                        relativeToURL:theBaseURL] absoluteString];
                 [attribute setStringValue:newAttributeString];
             }
         }
     }
     
-    // we’re done!
-    
-    NSData * data = [[element XMLString] dataUsingEncoding:NSUTF8StringEncoding
-                                      allowLossyConversion:YES];
-    
-    NSString * returnContents = [[[NSString alloc] initWithData:data
-                                                       encoding:NSUTF8StringEncoding] autorelease];
-    
-    // tell our handler :-)
-    dispatch_async( dispatch_get_main_queue(), ^(void)
-    {
-        [self setLoadProgress:1.0];
-        if( [returnContents length] == 0 )
-        {
-            [self errorOut];
-            return;
-        }
-        completionHandler( returnContents );
-    });   
+	return element;
 }
 
 // CHANGEME: rewrite to pass error by reference
