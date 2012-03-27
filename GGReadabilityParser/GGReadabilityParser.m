@@ -35,6 +35,15 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
     [super dealloc];
 }
 
+- (id)initWithOptions:(GGReadabilityParserOptions)parserOptions;
+{
+    if( ( self = [super init] ) != nil )
+    {
+        options = parserOptions;
+    }
+    return self;
+}
+
 - (id)initWithURL:(NSURL *)aURL
           options:(GGReadabilityParserOptions)parserOptions
 completionHandler:(GGReadabilityParserCompletionHandler)cHandler

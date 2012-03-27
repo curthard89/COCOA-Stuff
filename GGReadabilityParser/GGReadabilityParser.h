@@ -40,6 +40,7 @@ typedef NSInteger GGReadabilityParserOptions;
 
 @property ( nonatomic, assign ) float loadProgress;
 
+- (id)initWithOptions:(GGReadabilityParserOptions)parserOptions;
 - (id)initWithURL:(NSURL *)aURL
           options:(GGReadabilityParserOptions)parserOptions
 completionHandler:(GGReadabilityParserCompletionHandler)cHandler
@@ -48,5 +49,7 @@ completionHandler:(GGReadabilityParserCompletionHandler)cHandler
 - (void)cancel;
 - (void)render;
 - (void)renderWithString:(NSString *)string;
+
+- (NSXMLElement *)processXMLDocument:(NSXMLDocument *)XML baseURL:(NSURL *)theBaseURL error:(NSError **)error;
 
 @end
