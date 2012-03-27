@@ -423,7 +423,6 @@ didReceiveResponse:(NSURLResponse *)response
 }
 
 // CHANGEME: rewrite to pass error by reference
-// CHANGEME: check use of NSInteger vs. NSUInteger
 // CHANGEME: rename variables named elem…
 - (NSXMLElement *)findBaseLevelContent:(NSXMLElement *)element
 {
@@ -446,7 +445,7 @@ didReceiveResponse:(NSURLResponse *)response
     // basic instant wins
     NSArray * instantWins = [NSArray arrayWithObjects:@"article-body", nil];
     
-    NSInteger pCount = 0;
+    NSUInteger pCount = 0;
     NSXMLElement * foundElement = nil;
     
     for( NSString * instantWinName in instantWins )
@@ -457,7 +456,7 @@ didReceiveResponse:(NSURLResponse *)response
         {
             for( NSXMLElement * winElement in nodes )
             {
-                NSInteger count = [[winElement nodesForXPath:@".//p"
+                NSUInteger count = [[winElement nodesForXPath:@".//p"
                                                        error:&error] count];
                 if( count > pCount )
                 {
@@ -477,14 +476,14 @@ didReceiveResponse:(NSURLResponse *)response
     NSArray * tags = [element nodesForXPath:@".//p"
                                       error:&error];
     
-    NSInteger currentCount = 0;
+    NSUInteger currentCount = 0;
     NSXMLElement * tagParent = nil;
     for( NSXMLElement * tag in tags )
     {
         NSXMLElement * parent = (NSXMLElement *)[tag parent]; // the parent always is an element
         
         // count how many p tags are inside the parent
-        NSInteger parentTagsCount = [[parent nodesForXPath:@"p"
+        NSUInteger parentTagsCount = [[parent nodesForXPath:@"p"
                                                      error:&error] count];
         if( parentTagsCount > currentCount )
         {
@@ -507,7 +506,7 @@ didReceiveResponse:(NSURLResponse *)response
             NSXMLElement * parent = (NSXMLElement *)[tag parent];
             
             // count how many br tags there are
-            NSInteger parentTagsCount = [[parent nodesForXPath:@"br"
+            NSUInteger parentTagsCount = [[parent nodesForXPath:@"br"
                                                          error:&error] count];
             parentTagsCount += [self scoreElement:parent];
             if( parentTagsCount > currentCount )
@@ -521,8 +520,8 @@ didReceiveResponse:(NSURLResponse *)response
     // current br count
     if( usingBR && tagParent != nil )
     {
-        NSInteger textChildren = 0;
-        NSInteger brs = 0;
+        NSUInteger textChildren = 0;
+        NSUInteger brs = 0;
         for( NSXMLElement * el in [tagParent children] )
         {
             if( [el kind] == NSXMLTextKind )
