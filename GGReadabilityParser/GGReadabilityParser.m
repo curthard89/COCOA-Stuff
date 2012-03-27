@@ -120,7 +120,7 @@ didReceiveResponse:(NSURLResponse *)response
         };
         
         // some sites might not be UTF8, so try until nil
-        for( NSInteger i = 0; i < sizeof( encodings ) / sizeof( NSInteger ); i++ )
+        for( size_t i = 0; i < sizeof( encodings ) / sizeof( NSInteger ); i++ )
         {
             if( ( str = [[[NSString alloc] initWithData:responseData
                                                encoding:encodings[i]] autorelease] ) != nil )
@@ -164,7 +164,7 @@ didReceiveResponse:(NSURLResponse *)response
     
     // different types, html, xml
     BOOL OKToGo = NO;
-    for( NSInteger i = 0; i < sizeof( types ) / sizeof( NSInteger ); i++ )
+    for( size_t i = 0; i < sizeof( types ) / sizeof( NSInteger ); i++ )
     {
         XML = [[[NSXMLDocument alloc] initWithXMLString:string
                                                 options:types[i]
