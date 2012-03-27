@@ -203,11 +203,7 @@ didReceiveResponse:(NSURLResponse *)response
     
     // we’re done!
     
-    NSData * data = [[element XMLString] dataUsingEncoding:NSUTF8StringEncoding
-                                      allowLossyConversion:YES];
-    
-    NSString * returnContents = [[[NSString alloc] initWithData:data
-                                                       encoding:NSUTF8StringEncoding] autorelease];
+    NSString * returnContents = [element XMLString];
     
     // tell our handler :-)
     dispatch_async( dispatch_get_main_queue(), ^(void)
