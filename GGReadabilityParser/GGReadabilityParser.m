@@ -558,19 +558,19 @@ didReceiveResponse:(NSURLResponse *)response
     if( usingBR && tagParent != nil )
     {
         NSUInteger textChildren = 0;
-        NSUInteger brs = 0;
+        NSUInteger brCount = 0;
         for( NSXMLElement * el in [tagParent children] )
         {
             if( [el kind] == NSXMLTextKind )
             {
                 textChildren++;
             } else if ( [[[el name] lowercaseString] isEqualToString:@"br"] ) {
-                brs++;
+                brCount++;
             }
         }
         
         // whats the ratio?
-        if( textChildren < ( brs / 2 ) )
+        if( textChildren < ( brCount / 2 ) )
         {
             tagParent = nil;
         } else {
