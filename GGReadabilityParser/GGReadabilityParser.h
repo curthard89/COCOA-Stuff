@@ -30,6 +30,7 @@ typedef NSInteger GGReadabilityParserOptions;
     GGReadabilityParserCompletionHandler completionHandler;
     GGReadabilityParserOptions options;
     NSURL * URL;
+    NSURL * baseURL;
     long long dataLength;
     NSMutableData * responseData;
     NSURLConnection * URLConnection;

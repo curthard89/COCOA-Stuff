@@ -25,6 +25,7 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
 - (void)dealloc
 {
     [URL release], URL = nil;
+    [baseURL release], baseURL = nil;
     [URLResponse release], URLResponse = nil;
     [completionHandler release], completionHandler = nil;
     [errorHandler release], errorHandler = nil;
@@ -91,6 +92,7 @@ completionHandler:(GGReadabilityParserCompletionHandler)cHandler
 didReceiveResponse:(NSURLResponse *)response
 {
     URLResponse = [response retain];
+    baseURL = [[URLResponse URL] retain];
     dataLength = [response expectedContentLength];
 }
 
@@ -367,7 +369,6 @@ didReceiveResponse:(NSURLResponse *)response
         [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
     }
     
-    NSURL * baseURL = [URLResponse URL];
     
     for( NSDictionary * dict in elementsToRemove )
     {
