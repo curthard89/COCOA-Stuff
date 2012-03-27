@@ -359,23 +359,25 @@ didReceiveResponse:(NSURLResponse *)response
         } while (elem != nil);
     }
     
-    // do we need to fix the links or the images
     [elementsToRemove removeAllObjects];
     
+    // do we need to fix the links or the images?
+    NSMutableArray * elementsToFix = [NSMutableArray array];
+
     // <img> tags
     if( options & GGReadabilityParserOptionFixImages )
     {
-        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"img", @"tagName", @"src", @"attributeName",nil]];
+        [elementsToFix addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"img", @"tagName", @"src", @"attributeName",nil]];
     }
     
     // <a> tags
     if( options & GGReadabilityParserOptionFixLinks )
     {
-        [elementsToRemove addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
+        [elementsToFix addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
     }
     
     
-    for( NSDictionary * dict in elementsToRemove )
+    for( NSDictionary * dict in elementsToFix )
     {
         // grab the elements
         NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
