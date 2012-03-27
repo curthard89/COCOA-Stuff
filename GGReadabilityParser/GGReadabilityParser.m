@@ -59,16 +59,21 @@ completionHandler:(GGReadabilityParserCompletionHandler)cHandler
     }
 }
 
+- (NSError *)defaultError
+{
+    NSString * errorString = @"Readability was unable to find any suitable content.";
+    NSError * error = [NSError errorWithDomain:@"com.geekygoodness.readability"
+                                          code:1
+                                      userInfo:[NSDictionary dictionaryWithObject:errorString
+                                                                           forKey:NSLocalizedDescriptionKey]];
+    return error;
+}
+
 - (void)errorOut
 {
     dispatch_async( dispatch_get_main_queue(), ^(void)
     {
-        NSString * errorString = @"Readability was unable to find any suitable content.";
-        NSError * error = [NSError errorWithDomain:@"com.geekygoodness.readability"
-                                              code:1
-                                          userInfo:[NSDictionary dictionaryWithObject:errorString
-                                                                               forKey:NSLocalizedDescriptionKey]];
-        errorHandler( error );
+        errorHandler([self defaultError]);
     });
 }
 
