@@ -417,33 +417,34 @@ didReceiveResponse:(NSURLResponse *)response
         [elementsToFix addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"a", @"tagName", @"href", @"attributeName",nil]];
     }
     
-    
-    for( NSDictionary * dict in elementsToFix )
-    {
-        // grab the elements
-        NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
-                                         error:error];
-        
-        if( els == nil )  return nil;
-        
-        NSString * attributeName = [dict objectForKey:@"attributeName"];
-        
-        for( NSXMLElement * fixEl in els )
-        {
-            NSXMLNode * attribute = [fixEl attributeForName:attributeName];
-            NSString * attributeStringValue = [attribute stringValue];
-            
-            // CHANGEME: This ignores relative paths
-            // CHANGEME: This is not necessary when processing webarchives 
-            if( [attributeStringValue length] != 0 && 
-               [attributeStringValue hasPrefix:@"/"] )
-            {
-                // needs fixing
-                NSString * newAttributeString = [[NSURL URLWithString:attributeStringValue
-                                                        relativeToURL:theBaseURL] absoluteString];
-                [attribute setStringValue:newAttributeString];
-            }
-        }
+    if (theBaseURL != nil) {
+		for( NSDictionary * dict in elementsToFix )
+		{
+			// grab the elements
+			NSArray * els = [element nodesForXPath:[NSString stringWithFormat:tagNameXPath,[dict objectForKey:@"tagName"]]
+											 error:error];
+			
+			if( els == nil )  return nil;
+			
+			NSString * attributeName = [dict objectForKey:@"attributeName"];
+			
+			for( NSXMLElement * fixEl in els )
+			{
+				NSXMLNode * attribute = [fixEl attributeForName:attributeName];
+				NSString * attributeStringValue = [attribute stringValue];
+				
+				// CHANGEME: This ignores relative paths
+				// CHANGEME: This is not necessary when processing webarchives 
+				if( [attributeStringValue length] != 0 && 
+				   [attributeStringValue hasPrefix:@"/"] )
+				{
+					// needs fixing
+					NSString * newAttributeString = [[NSURL URLWithString:attributeStringValue
+															relativeToURL:theBaseURL] absoluteString];
+					[attribute setStringValue:newAttributeString];
+				}
+			}
+		}
     }
     
 	return element;
