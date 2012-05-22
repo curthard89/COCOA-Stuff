@@ -21,7 +21,7 @@ NSString * const	tagNameXPath = @".//*[lower-case(name())='%@']";
 
 @synthesize loadProgress;
 
-// CHANGME: change ivars into private properties where appropriate
+// CHANGEME: change ivars into private properties where appropriate
 
 - (void)dealloc
 {
@@ -257,7 +257,7 @@ didReceiveResponse:(NSURLResponse *)response
         return nil;
     }
 
-    // CHANGME: The next comment doesn’t match what’s going on in the code!
+    // CHANGEME: The next comment doesn’t match what’s going on in the code!
     // now that we have the base element to work with, let’s remove all <div>s that don’t have a parent of a p
     
     NSMutableArray * elementsToRemove = [NSMutableArray array];
@@ -622,7 +622,7 @@ didReceiveResponse:(NSURLResponse *)response
 - (NSInteger)scoreElement:(NSXMLElement *)element
 {
     // these are key words that will probably be inside the class or id of the element that contains the content
-    // CHANGME: move the scores array into an ivar
+    // CHANGEME: move the scores array into an ivar
     NSArray * scores = [NSArray arrayWithObjects:@"post", @"entry", @"content", @"text", @"article", @"story", @"blog", nil];
     NSInteger score = 0;
     for( NSString * positiveWord in scores )
