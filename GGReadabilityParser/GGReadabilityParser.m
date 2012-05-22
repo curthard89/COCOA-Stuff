@@ -578,6 +578,7 @@ didReceiveResponse:(NSURLResponse *)response
         }
         
     }
+
     // if nothing is found, let’s try something else…
     if( tagParent == nil )
     {
@@ -585,8 +586,6 @@ didReceiveResponse:(NSURLResponse *)response
         // now we’re going to try and find the content, because either they don’t use <p> tags or it’s just horrible markup
         
         NSMutableDictionary * scoreDict = [NSMutableDictionary dictionary];
-        
-        NSXMLElement * currentElement = nil;
         
         // grab everything that has it within class or id
         NSXMLNode * elem = element;
@@ -608,11 +607,22 @@ didReceiveResponse:(NSURLResponse *)response
                           forKey:el];                
         } while ((elem = [elem nextNode]) != nil);
         
-        // CHANGEME: This code doesn’t actually do ANYTHING with the scoreDict
+        __block NSXMLElement *bestKey = nil;
+        __block NSInteger bestScore = 0;
+        [scoreDict enumerateKeysAndObjectsUsingBlock:^(NSXMLElement *key, NSNumber *scoreNum, BOOL *stop) 
+        {
+            NSInteger score = [scoreNum integerValue];
+            if (score > bestScore) 
+            {
+                bestKey = key;
+                bestScore = score;
+            }
+        }];
+
         // CHANGEME: The above use of an NSMutableDictionary will fail horribly if there happen to be two NSXMLElement objects in the tree that are equal as defined by -isEqual: . The problem here is that the equality check will ignore the location of the element within the tree. If we try to actually use the scores to find a suitable element the resulting element we get is not deterministic from a global perspective. We can apply the solution used in readability-objc (HashableElement): https://github.com/JanX2/readability-objc [Jan]
         
         // set the parent tag
-        tagParent = currentElement;
+        tagParent = bestKey;
         
     }
     
