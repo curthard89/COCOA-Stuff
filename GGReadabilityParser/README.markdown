@@ -1,9 +1,9 @@
 # GGReadabilityParser
 -------------------------------
-GGReadabilityParser is a complete rewrite of the current GGReadability, this new version is
-almost four times as quick aswell as providing much better results.
+GGReadabilityParser is a complete rewrite of the current GGReadability. This new version is
+almost four times as fast and it provides much better results.
 
-The use is simple, you have to create a new GGReadabilityParser object like this:
+Using it is simple. You create a new GGReadabilityParser object like this:
 	
 	GGReadabilityParser * readability = [[GGReadabilityParser alloc] initWithURL:[NSURL URLWithString:@"someURLHere"]
                                                   						 options:GGReadabilityParserOptionClearStyles|GGReadabilityParserOptionClearLinkLists|GGReadabilityParserOptionFixLinks|GGReadabilityParserOptionFixImages|GGReadabilityParserOptionRemoveHeader|GGReadabilityParserOptionRemoveIFrames
@@ -16,16 +16,16 @@ The use is simple, you have to create a new GGReadabilityParser object like this
     	// handle error returned
     }];
     
-This will create object, it requires a NSURL for the URL, a list of options that you want the parser to carry out, a completion handler block and an error block.
+This will create the GGReadabilityParser object. It requires an NSURL for the URL you want to process, a list of options that you want the parser to apply to the content and finally a completion handler block and an error block.
 
-To get readability to parser just call:
+To get readability to parse just call:
 
 	[readability render];
 	
-If you want to check the load progress of it then you can simply check the loadProgress ivar - you can also bind to this.
+If you want to check the load progress then you can simply check the loadProgress property. You can also bind to this.
 
 ## Licence
 GGReadabilityParser is free to use for everyone.
 
-Please leave credit in your application where it is due - its only nice to :)
+Please credit GGReadabilityParser in your application. It’s the nice thing to do. :)
 
